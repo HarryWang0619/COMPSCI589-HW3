@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 
 def importfile(name:str,delimit:str):
+    # importfile('hw3_wine.csv', '\t')
     file = open("datasets/"+name, encoding='utf-8-sig')
     reader = csv.reader(file, delimiter=delimit)
     dataset = []
