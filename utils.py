@@ -16,27 +16,32 @@ def importfile(name:str,delimit:str):
     file.close()
     return dataset
 
-def same(column):
-    return all(item == column[0] for item in column)
+def same(attributecolumn):
+    return all(item == attributecolumn[0] for item in attributecolumn)
 
-def majority(column):
-    return np.argmax(np.bincount(column))
+def majority(attributecolumn):
+    return np.argmax(np.bincount(attributecolumn))
 
-def entropy(col):
-    values = list(Counter(col).values())
+def entropy(attributecol):
+    values = list(Counter(attributecol).values())
     ent = 0
     for value in values:
         k = (value/sum(values))
         ent += -k*math.log(k,2)
     return ent
 
-def gini(col):
-    values = list(Counter(col).values())
+def gini(attributecol):
+    values = list(Counter(attributecol).values())
     ginivalue = 1
     for value in values:
         prob = (value/sum(values))
         ginivalue -= prob**2
     return ginivalue
+
+def id3(dataset, listofattribution):
+    return
+
+
 
 def id3cat(collist, listattribution):
     original_ent = entropy(collist[-1])

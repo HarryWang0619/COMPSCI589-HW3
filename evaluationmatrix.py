@@ -9,14 +9,14 @@ def precision(truePosi, trueNega, falsePosi, falseNega):
 	if (truePosi+falsePosi) == 0:
 		return 0
 	preposi = truePosi/(truePosi+falsePosi)
-	prenega = trueNega/(trueNega+falseNega)
+	# prenega = trueNega/(trueNega+falseNega)
 	return preposi
 
 def recall(truePosi, trueNega, falsePosi, falseNega):
 	if (truePosi+falseNega)== 0:
 		return 0
 	recposi = truePosi/(truePosi+falseNega)
-	recnega = trueNega/(trueNega+falsePosi)
+	# recnega = trueNega/(trueNega+falsePosi)
 	return recposi
 
 def fscore(truePosi, trueNega, falsePosi, falseNega, beta: 1):
@@ -26,6 +26,13 @@ def fscore(truePosi, trueNega, falsePosi, falseNega, beta: 1):
 		return 0
 	f = (1+beta**2)*((pre*rec)/(pre*(beta**2)+rec))
 	return f
+
+def markdowntemplate(tp,tn,fp,fn,beta,title):
+	acc = accuracy(tp,tn,fp,fn)
+	pre = precision(tp,tn,fp,fn)
+	rec = recall(tp,tn,fp,fn)
+	fsc = fscore(tp,tn,fp,fn,beta)
+	return
 
 def confusionmatrix(truePosi, trueNega, falsePosi, falseNega, title=""):
 	fig = plt.figure()
