@@ -46,57 +46,123 @@ def dropbyindex(data, category, listindex):
     [newcategory.pop(key) for key in keytoremove]
     return newdata, newcategory
 
+def id3bestseperate(dataset, attributes:dict):
+    # dataset in is the dataset by row. 
+    # attributes is the dictionary of attributes:type 
+    # types: numerical, categorical, binary.
+    datasetbycolumn = dataset.T
+    classindex = list(attributes.values()).index("class")
+    originalentrophy = entropy(datasetbycolumn[classindex])
+    smallestentrophy = originalentrophy
+    thresholdvalue = -1
 
-def id3cat(collist, listattribution):
-    original_ent = entropy(collist[-1])
-    smallest_ent = 1
     i = 0
+    bestattribute = {list(attributes.keys())[i]:attributes[list(attributes.keys())[i]]}
+    attributesinuse = list(attributes.keys())[1:] if (classindex == 0) else list(attributes.keys())[:classindex]
+    # datasetinuse = datasetbycolumn[1:] if (classindex == 0) else datasetbycolumn[:classindex]
 
-    # bestindex = i
-    best = listattribution[i]
-    for attributes in listattribution[:-1]: # I keep the last column: the target/label.
-        liskey = list(Counter(collist[i]).keys())
-        listofcategory = []
-        for value in liskey:
-            index = [idx for idx, element in enumerate(collist[i]) if element == value]
-            category = np.array(collist[-1][index]) 
-            listofcategory.append(category) # list of nparrays of target/label/categories.
+    for attribute in attributesinuse:
+        idx = i+1 if classindex == 0 else i
 
-        ent = 0
-        for cat in listofcategory:
-            a = len(cat)/len(collist[i]) # This is probability
-            ent += a * entropy(cat) # probability multiple by entropy
+        if attributes[attribute] == "categorical" or attributes[attribute] == "binary":
+            listofkeys = list(Counter(datasetbycolumn[idx]).keys())
+            listofcategory = [] # this is the list of categorical values.
+            
+            for key in listofkeys:
+                indexlist = [idex for idex, element in enumerate(datasetbycolumn[idx]) if element == key]
+                category = np.array(datasetbycolumn[classindex][indexlist])
+                listofcategory.append(category)
 
-        if ent < smallest_ent:
-            smallest_ent = ent
-            best = attributes
-            # bestindex = i
-        i+=1
+            entropynow = 0
 
-    return best, original_ent-ent
+            for ctgry in listofcategory:
+                a = len(ctgry)/len(datasetbycolumn[idx]) # This is probability
+                entropynow += a * entropy(ctgry)
 
-def cartcat(collist, listattribution):
-    smallest_gini = 1
+            if entropynow < smallestentrophy:
+                smallestentrophy = entropynow
+                bestattribute = {attribute:attributes[attribute]}
+            
+        elif attributes[attribute] == "numerical":
+            datasetsort = datasetbycolumn.T[datasetbycolumn.T[:,idx].argsort(kind='quicksort')].T
+            currentthreshold = (datasetsort[idx][1]+datasetsort[idx][0])/2
+            k = 1
+            while k < len(datasetsort.T):
+                currentthreshold = (datasetsort[idx][k]+datasetsort[idx][k-1])/2
+                listofcategory = [datasetsort[classindex][:k],datasetsort[classindex][k:]]
+                entropynow = 0
+
+                for ctgry in listofcategory:
+                    a = len(ctgry)/len(datasetbycolumn[idx]) # This is probability
+                    entropynow += a * entropy(ctgry)
+
+                if entropynow < smallestentrophy:
+                    smallestentrophy = entropynow
+                    thresholdvalue = currentthreshold
+                    bestattribute = {attribute:attributes[attribute]}    
+                k += 1
+        i += 1
+
+    gain = originalentrophy-smallestentrophy
+    # set first attribution dictionary {key:type} to the best attributes.
+    return bestattribute, thresholdvalue, gain
+
+def cartbestseperate(dataset, attributes:dict):
+    # dataset in is the dataset by row. 
+    # attributes is the dictionary of attributes:type 
+    # types: numerical, categorical, binary.
+    datasetbycolumn = dataset.T
+    classindex = list(attributes.values()).index("class")
+    originalgini = gini(datasetbycolumn[classindex])
+    smallestgini = originalgini
+    thresholdvalue = -1
+
     i = 0
-    # bestindex = i
-    best = listattribution[i]
-    for attributes in listattribution[:-1]: # I keep the last column: the target/label.
-        liskey = list(Counter(collist[i]).keys())
-        listofcategory = []
-        for value in liskey:
-            index = [idx for idx, element in enumerate(collist[i]) if element == value]
-            category = np.array(collist[-1][index]) 
-            listofcategory.append(category) # list of nparrays of target/label/categories.
+    bestattribute = {list(attributes.keys())[i]:attributes[list(attributes.keys())[i]]}
+    attributesinuse = list(attributes.keys())[1:] if (classindex == 0) else list(attributes.keys())[:classindex]
+    # datasetinuse = datasetbycolumn[1:] if (classindex == 0) else datasetbycolumn[:classindex]
 
-        gin = 0
-        for cat in listofcategory:
-            a = len(cat)/len(collist[i]) # This is probability
-            gin += a * gini(cat) # probability multiple by gini
+    for attribute in attributesinuse:
+        idx = i+1 if classindex == 0 else i
 
-        if gin < smallest_gini:
-            smallest_gini = gin
-            best = attributes
-            # bestindex = i
-        i+=1
+        if attributes[attribute] == "categorical" or attributes[attribute] == "binary":
+            listofkeys = list(Counter(datasetbycolumn[idx]).keys())
+            listofcategory = [] # this is the list of categorical values.
+            
+            for key in listofkeys:
+                indexlist = [idex for idex, element in enumerate(datasetbycolumn[idx]) if element == key]
+                category = np.array(datasetbycolumn[classindex][indexlist])
+                listofcategory.append(category)
 
-    return best, gin
+            currentgini = 0
+
+            for ctgry in listofcategory:
+                a = len(ctgry)/len(datasetbycolumn[idx]) # This is probability
+                currentgini += a * gini(ctgry)
+
+            if currentgini < smallestgini:
+                smallestgini = currentgini
+                bestattribute = {attribute:attributes[attribute]}
+            
+        elif attributes[attribute] == "numerical":
+            datasetsort = datasetbycolumn.T[datasetbycolumn.T[:,idx].argsort(kind='quicksort')].T
+            currentthreshold = (datasetsort[idx][1]+datasetsort[idx][0])/2
+            k = 1
+            while k < len(datasetsort.T):
+                currentthreshold = (datasetsort[idx][k]+datasetsort[idx][k-1])/2
+                listofcategory = [datasetsort[classindex][:k],datasetsort[classindex][k:]]
+                currentgini = 0
+
+                for ctgry in listofcategory:
+                    a = len(ctgry)/len(datasetbycolumn[idx]) # This is probability
+                    currentgini += a * gini(ctgry)
+
+                if currentgini < smallestgini:
+                    smallestgini = currentgini
+                    thresholdvalue = currentthreshold
+                    bestattribute = {attribute:attributes[attribute]}    
+                k += 1
+        i += 1
+
+    # set first attribution dictionary {key:type} to the best attributes.
+    return bestattribute, thresholdvalue, smallestgini
