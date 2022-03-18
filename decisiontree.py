@@ -22,59 +22,81 @@ class Treenode:
         # self.left = left
         # self.right = right
 
-
 # Decision Tree
-def decisiontree(dataset: np.array, listattributes: list, algortype: str ='id3'):
-    def processbest(algor):
-        if algor == "id3" or algor == "infogain":
-            return id3(datasetcopy, listattricopy)
-        elif algor == "cart" or algor == "gini":
-            return cart(datasetcopy, listattricopy)
-        else: 
-            return cart(datasetcopy, listattricopy)
+def decisiontree(dataset: np.array, dictattributes: dict, algortype: str ='id3'):
+    datasetcopy = np.copy(dataset).T # dataset copy is by colomn. 
+    dictattricopy = dictattributes.copy()
+    classindex = list(dictattricopy.values()).index("class")
 
-    datasetcopy = np.copy(dataset)
-    listattricopy = listattributes.copy()
-    
+    def processbest(algor):
+        if algor == "cart" or algor == "gini":
+            return cartbestseperate(datasetcopy.T, dictattricopy)
+        else: # algor == "id3" or algor == "infogain"
+            return id3bestseperate(datasetcopy.T, dictattricopy)
+
     node = Treenode(label=-1,type="decision")
 
-    node.majority = majority(datasetcopy[-1])
+    node.majority = majority(datasetcopy[classindex])
 
-    if same(datasetcopy[-1]):
+    if same(datasetcopy[classindex]):
         node.type = "leaf"
-        node.label = datasetcopy[-1][0]
+        node.label = datasetcopy[classindex][0]
         return node
     
-    if len(listattricopy) == 0:
+    if len(dictattricopy) == 0:
         node.type = "leaf"
-        node.label = majority(datasetcopy[-1])
+        node.label = majority(datasetcopy[classindex])
         return node
 
-    bestattribute = processbest(algortype)[0]
-    node.testattribute = bestattribute
-    bindex = listattricopy.index(bestattribute)
-
-    bigv = list(Counter(datasetcopy[bindex]).keys())
+    bestattributedict,thresholdval = processbest(algortype)[:2]
+    bestattributename = list(bestattributedict.keys())[0]
+    bestattributetype = bestattributedict[bestattributename]
+    node.testattributedict = bestattributedict
+    node.datatype = bestattributetype
+    node.testattribute = bestattributename
+    node.threshold = thresholdval
+    bindex = list(dictattricopy.keys()).index(list(bestattributedict.keys())[0])
 
     subdatalists = []
-    for smallv in bigv:
-        index = [idx for idx, element in enumerate(datasetcopy[bindex]) if element == smallv]
-        subdatav = np.array(datasetcopy.T[index]).T
-        subdatav = np.delete(subdatav,bindex,0)  # I delete the column I already used using bindex as reference. 
-        # Then, later, pop the same index from list attribute.
-        subdatalists.append(subdatav) # list of nparrays of target/label/categories.
+    if bestattributetype == "numerical":
+        sortedcopy = datasetcopy.T[datasetcopy.T[:,bindex].argsort(kind='quicksort')].T
+        splitindex = 0
+        for numericalvalue in sortedcopy[bindex]:
+            if numericalvalue > thresholdval:
+                break
+            else:
+                splitindex += 1
+        subdatalistraw = [sortedcopy.T[:splitindex].T,sortedcopy.T[splitindex:].T]
+        for subdata in subdatalistraw:
+            subdatav = np.delete(subdata,bindex,0)
+            subdatalists.append(subdatav.T)
+    else:
+        bigv = list(Counter(datasetcopy[bindex]).keys()) # this is the all the categories of the test attribute left.
+    
+        for smallv in bigv:
+            index = [idx for idx, element in enumerate(datasetcopy[bindex]) if element == smallv]
+            subdatav = np.array(datasetcopy.T[index]).T
+            subdatav = np.delete(subdatav,bindex,0)  # I delete the column I already used using bindex as reference. 
+            # Then, later, pop the same index from list attribute.
+            subdatalists.append(subdatav.T) # list of nparrays of target/label/categories.
 
-    listattricopy.pop(bindex)
+    dictattricopy.pop(bestattributename)
     
     edge = {}
     sdindex = 0
     for subvdata in subdatalists:
         if subvdata.size == 0:
             node.type = "leaf"
-            node.label = majority(subdatav[-1])
+            node.label = node.majority
+            node.threshold = thresholdval
+            return node
 
-        subtree = decisiontree(subvdata, listattricopy, algortype)
-        attributevalue = bigv[sdindex]
+        subtree = decisiontree(subvdata, dictattricopy, algortype)
+        if bestattributetype == 'numerical':
+            attributevalue = "<=" if sdindex == 0 else ">"
+        else:
+            attributevalue = bigv[sdindex]
+
         edge[attributevalue] = subtree
         sdindex += 1
 
