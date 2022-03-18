@@ -21,7 +21,7 @@ def same(attributecolumn):
     return all(item == attributecolumn[0] for item in attributecolumn)
 
 def majority(attributecolumn):
-    return np.argmax(np.bincount(attributecolumn))
+    return np.argmax(np.bincount(attributecolumn.astype(int)))
 
 def entropy(attributecol):
     values = list(Counter(attributecol).values())

@@ -8,11 +8,13 @@ from utils import *
 
 class Treenode:
     type = ""
+    datatype = ""
     label = None
     testattribute = ""
     edge = {}
     majority = -1
     threshold = -1 # for numerical value
+    testattributedict = {}
 
     def __init__(self, label, type):
         self.label = label
