@@ -39,7 +39,7 @@ def gini(attributecol):
         ginivalue -= prob**2
     return ginivalue
 
-def id3(dataset, listofattribution):
+def drop(data,category):
     return
 
 
