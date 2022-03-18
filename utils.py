@@ -39,9 +39,12 @@ def gini(attributecol):
         ginivalue -= prob**2
     return ginivalue
 
-def drop(data,category):
-    return
-
+def dropbyindex(data, category, listindex):
+    newdata = np.delete(data.T, listindex).T
+    keytoremove = [list(category.keys())[i] for i in listindex]
+    newcategory = category.copy()
+    [newcategory.pop(key) for key in keytoremove]
+    return newdata, newcategory
 
 
 def id3cat(collist, listattribution):
