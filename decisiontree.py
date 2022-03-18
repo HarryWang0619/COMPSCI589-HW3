@@ -103,3 +103,28 @@ def decisiontree(dataset: np.array, dictattributes: dict, algortype: str ='id3')
     node.edge = edge
 
     return node
+
+# Tell me whether a single result is correct or not.
+def prediction(tree: Treenode, instance, dictattricopy): # note that the instance if by row. (I formerly used by column)
+    predict = tree.majority
+    classindex = list(dictattricopy.values()).index("class")
+    correct = instance[classindex]
+    if tree.type == 'leaf':
+        predict = tree.label
+        return predict==correct, predict, correct
+
+    testindex = list(dictattricopy.keys()).index(tree.testattribute)
+    
+    if tree.datatype == "numerical":
+        if instance[testindex] <= tree.threshold:
+            nexttree = tree.edge['<=']
+        else:
+            nexttree = tree.edge['>']
+    else:
+        if instance[testindex] not in tree.edge:
+            return predict==correct, predict, correct
+            
+        nexttree = tree.edge[instance[testindex]]
+
+    return prediction(nexttree, instance, dictattricopy)
+   
