@@ -15,12 +15,23 @@ class Treenode:
     majority = -1
     threshold = -1 # for numerical value
     testattributedict = {}
+    depth = 0
+    
+    parent = None
 
     def __init__(self, label, type):
         self.label = label
         self.type = type
         # self.left = left
         # self.right = right
+
+    def calculate_parent(self):
+        a = self
+        while a.parent is not None:
+            self.depth += 1
+            print(self.depth)
+            a = a.parent
+        return self.depth
 
 # Decision Tree
 def decisiontree(dataset: np.array, dictattributes: dict, algortype: str ='id3'):
