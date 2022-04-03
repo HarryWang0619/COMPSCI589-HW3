@@ -27,6 +27,36 @@ def fscore(truePosi, trueNega, falsePosi, falseNega, beta: 1):
 	f = (1+beta**2)*((pre*rec)/(pre*(beta**2)+rec))
 	return f
 
+def evaluate(listsofoutput, positivelabel, beta=1):
+    # list is list of [predicted, actual]
+    listoftptnfpfn = []
+    accuarcylists = []
+    precisionlists = []
+    recalllists = []
+    fscorelists = []
+    for output in listsofoutput:
+        tp, tn, fp, fn, = 0, 0, 0, 0
+        for i in range(len(output)):
+            if output[i][0] == positivelabel and output[i][1] == positivelabel:
+                tp += 1
+            elif output[i][0] != positivelabel and output[i][0] == output[i][1]:
+                tn += 1
+            elif output[i][0] == positivelabel and output[i][1] != positivelabel:
+                fp += 1
+            elif output[i][0] != positivelabel and output[i][1] == positivelabel:
+                fn += 1
+        tptnfpfn = [tp, tn, fp, fn]
+        listoftptnfpfn.append(tptnfpfn)
+        accuarcylists.append(accuracy(tp, tn, fp, fn))
+        precisionlists.append(precision(tp, tn, fp, fn))
+        recalllists.append(recall(tp, tn, fp, fn))
+        fscorelists.append(fscore(tp, tn, fp, fn, beta))
+    return accuarcylists, precisionlists, recalllists, fscorelists, listoftptnfpfn
+
+def meanevaluation(listsofoutput, positivelabel, beta=1):
+    accuarcylists, precisionlists, recalllists, fscorelists, notused = evaluate(listsofoutput, positivelabel, beta)
+    return sum(accuarcylists)/len(accuarcylists), sum(precisionlists)/len(precisionlists), sum(recalllists)/len(recalllists), sum(fscorelists)/len(fscorelists)
+
 def markdowntemplate(tp,tn,fp,fn,beta,title):
 	acc = accuracy(tp,tn,fp,fn)
 	pre = precision(tp,tn,fp,fn)
