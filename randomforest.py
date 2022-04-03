@@ -68,7 +68,7 @@ def kfoldcrossvalid(data, categorydict, k=10, ntree=10, maxdepth=5, minimalsize=
     listofnd = []
     accuracylist = []
     for i in range(k):
-        print("at fold", i)
+        # print("at fold", i)
         testdataset = folded[i]
         foldedcopy = folded.copy()
         foldedcopy.pop(i)
@@ -83,73 +83,7 @@ def kfoldcrossvalid(data, categorydict, k=10, ntree=10, maxdepth=5, minimalsize=
             if predict == correct:
                 correctcount += 1
         listofnd.append(np.array(emptyanalysis))
-        print('fold', i, ' accuracy: ', correctcount/len(testdataset))
+        print('fold', i+1, ' accuracy: ', correctcount/len(testdataset))
         accuracylist.append(correctcount/len(testdataset))
     acc = np.mean(accuracylist)
-    return acc
-
-
-def importhousedata():
-    house = importfile('hw3_house_votes_84.csv', ',')
-    housecategory = {}
-    for i in house[0]:
-        housecategory[i] = 'categorical'
-    housecategory["class"] = 'class'
-    housedata = np.array(house[1:]).astype(float)
-    return housedata, housecategory
-
-def importwinedata():
-    wine = importfile('hw3_wine.csv', '\t')
-    winecategory = {}
-    for i in wine[0]:
-        winecategory[i] = 'numerical'
-    winecategory["# class"] = 'class'
-    winedata = np.array(wine[1:]).astype(float)
-    return winedata, winecategory
-
-def importcancerdata():
-    cancer = importfile('hw3_cancer.csv', '\t')
-    cancercategory = {}
-    for i in cancer[0]:
-        cancercategory[i] = 'numerical'
-    cancercategory["Class"] = 'class'
-    cancerdata = np.array(cancer[1:]).astype(float)
-    return cancerdata, cancercategory
-
-def importcmcdata():
-    cmc = importfile('cmc.data', ',')
-    cmccategory = {"Wife's age":"numerical","Wife's education":"categorical",
-    "Husband's education":"categorical","Number of children ever born":"numerical",
-    "Wife's religion":"binary","Wife's now working?":"binary",
-    "Husband's occupation":"categorical","Standard-of-living index":"categorical",
-    "Media exposure":"binary","Contraceptive method used":"class"}
-    cmcdata = np.array(cmc).astype(int)
-    return cmcdata, cmccategory
-    
-housedata, housecategory = importhousedata()
-winedata, winecategory = importwinedata()
-cancerdata, cancercategory = importcancerdata()
-cmcdata,cmccategory = importcmcdata()
-
-xval = kfoldcrossvalid(cancerdata, cancercategory, k=10, ntree=20, maxdepth=10, minimalsize=10, minimalgain=0.01, algortype='id3', bootstrapratio = 0.1)
-print(xval)
-# mytestforest = plantforest(cmcdata, cmccategory, ntree=150, maxdepth=7, minimalsize=10, minimalgain=0.001, algortype='id3', bootstrapratio=0.15)
-# tree01 = mytestforest[0]
-
-# cc = 0
-# for instance in cmcdata:
-#     predict,correct,bool = prediction(tree01,instance,cmccategory)
-#     # print(predict,correct,bool)
-#     if bool:
-#         cc += 1
-
-# print(cc/len(cmcdata))
-
-# cc2 = 0
-# for instance in cmcdata:
-#     predict, correct = forestvote(mytestforest,instance,cmccategory)
-#     #print(predict, correct)
-#     if predict == correct:
-#         cc2 += 1
-
-# print(cc2/len(cmcdata))
+    return listofnd, acc
