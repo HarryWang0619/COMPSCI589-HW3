@@ -22,7 +22,7 @@ def stratifiedkfold(data, categorydict, k = 10):
     for j in range(k):
         ithterm = []
         for i in range(nclass):
-            if ithterm == []:
+            if len(ithterm) == 0:
                 ithterm = splitted[i][j]
             else:
                 ithterm = np.append(ithterm,splitted[i][j],0)
@@ -43,10 +43,10 @@ def bootstrap(data, ratio=0.1):
     return data2
 
 # Random Forest, plant a forest of n trees
-def plantforest(data, categorydict, ntree=10, maxdepth=10, minimalsize=10, minimalgain=0.01, algortype='id3'):
+def plantforest(data, categorydict, ntree=10, maxdepth=10, minimalsize=10, minimalgain=0.01, algortype='id3', bootstrapratio = 0.1):
     forest = []
     for i in range(ntree):
-        datause = bootstrap(data, 0.05)
+        datause = bootstrap(data, bootstrapratio)
         tree = decisiontreeforest(datause,categorydict,algortype,maxdepth,minimalsize,minimalgain)
         forest.append(tree)
     return forest
@@ -62,6 +62,33 @@ def forestvote(forest, instance, categorydict):
             votes[predict] += 1
     return max(votes, key=votes.get), correct
 
+# A complete k-fold cross validation
+def kfoldcrossvalid(data, categorydict, k=10, ntree=10, maxdepth=5, minimalsize=10, minimalgain=0.01, algortype='id3', bootstrapratio = 0.1):
+    folded = stratifiedkfold(data, categorydict, k)
+    listofnd = []
+    accuracylist = []
+    for i in range(k):
+        print("at fold", i)
+        testdataset = folded[i]
+        foldedcopy = folded.copy()
+        foldedcopy.pop(i)
+        traindataset = np.vstack(foldedcopy) 
+        correctcount = 0
+        trainforest = plantforest(traindataset,categorydict,ntree,maxdepth,minimalsize,minimalgain,algortype,bootstrapratio)
+        emptyanalysis = []
+        # testdataset = traindataset
+        for instance in testdataset:
+            predict, correct = forestvote(trainforest,instance,categorydict)
+            emptyanalysis.append([predict, correct])
+            if predict == correct:
+                correctcount += 1
+        listofnd.append(np.array(emptyanalysis))
+        print('fold', i, ' accuracy: ', correctcount/len(testdataset))
+        accuracylist.append(correctcount/len(testdataset))
+    acc = np.mean(accuracylist)
+    return acc
+
+
 def importdata():
     cmc = importfile('cmc.data', ',')
     cmccategory = {"Wife's age":"numerical","Wife's education":"categorical",
@@ -74,23 +101,25 @@ def importdata():
     
 cmcdata,cmccategory = importdata()
 
-mytestforest = plantforest(cmcdata, cmccategory, ntree=70, maxdepth=5, minimalsize=10, minimalgain=0.001, algortype='gini')
-tree01 = mytestforest[0]
+xval = kfoldcrossvalid(cmcdata, cmccategory, k=10, ntree=50, maxdepth=5, minimalsize=20, minimalgain=0.01, algortype='id3', bootstrapratio = 0.1)
+print(xval)
+# mytestforest = plantforest(cmcdata, cmccategory, ntree=150, maxdepth=7, minimalsize=10, minimalgain=0.001, algortype='id3', bootstrapratio=0.15)
+# tree01 = mytestforest[0]
 
-cc = 0
-for instance in cmcdata:
-    predict,correct,bool = prediction(tree01,instance,cmccategory)
-    # print(predict,correct,bool)
-    if bool:
-        cc += 1
+# cc = 0
+# for instance in cmcdata:
+#     predict,correct,bool = prediction(tree01,instance,cmccategory)
+#     # print(predict,correct,bool)
+#     if bool:
+#         cc += 1
 
-print(cc/len(cmcdata))
+# print(cc/len(cmcdata))
 
-cc2 = 0
-for instance in cmcdata:
-    predict, correct = forestvote(mytestforest,instance,cmccategory)
-    #print(predict, correct)
-    if predict == correct:
-        cc2 += 1
+# cc2 = 0
+# for instance in cmcdata:
+#     predict, correct = forestvote(mytestforest,instance,cmccategory)
+#     #print(predict, correct)
+#     if predict == correct:
+#         cc2 += 1
 
-print(cc2/len(cmcdata))
+# print(cc2/len(cmcdata))
