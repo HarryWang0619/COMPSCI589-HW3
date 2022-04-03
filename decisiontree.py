@@ -18,7 +18,7 @@ class Treenode:
     testattributedict = {}
     depth = 0
     _caldepth = 0
-    
+
     parent = None
 
     def __init__(self, label, type):
@@ -33,6 +33,12 @@ class Treenode:
             self._caldepth += 1
             a = a.parent
         return self._caldepth
+    
+    def isfather(self):
+        if self.parent is None:
+            return True
+        else:
+            return False
 
 # Decision Tree that only analyze square root of the data.
 def decisiontreeforest(dataset: np.array, dictattributes: dict, algortype: str ='id3', maxdepth: int = 10, minimalsize: int = 10, minimalgain: float = 0.01):
@@ -148,3 +154,27 @@ def decisiontreeforest(dataset: np.array, dictattributes: dict, algortype: str =
     node.edge = edge
 
     return node
+
+# Predict the label of the test data, return correct and predict.
+def prediction(tree: Treenode, instance, dictattricopy): # note that the instance is by row. (I formerly used by column)
+    predict = tree.majority
+    classindex = list(dictattricopy.values()).index("class")
+    correct = instance[classindex]
+    if tree.type == 'leaf':
+        predict = tree.label
+        return predict, correct, predict==correct
+
+    testindex = list(dictattricopy.keys()).index(tree.testattribute)
+    
+    if tree.datatype == "numerical":
+        if instance[testindex] <= tree.threshold:
+            nexttree = tree.edge['<=']
+        else:
+            nexttree = tree.edge['>']
+    else:
+        if instance[testindex] not in tree.edge:
+            return predict, correct, predict==correct
+            
+        nexttree = tree.edge[instance[testindex]]
+
+    return prediction(nexttree, instance, dictattricopy)

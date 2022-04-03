@@ -39,7 +39,7 @@ def bootstrap(data, ratio=0.1):
     p = len(data2)
     randomfill = random.sample(range(0, p), k-p)
     data2 = np.concatenate((data2,data2[randomfill]),0)
-    print(len(data2))
+    # print(len(data2))
     return data2
 
 
