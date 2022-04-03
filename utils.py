@@ -166,4 +166,5 @@ def cartbestseperate(dataset, attributes:dict):
         i += 1
 
     # set first attribution dictionary {key:type} to the best attributes.
-    return bestattribute, thresholdvalue, smallestgini
+    gain = originalgini-smallestgini
+    return bestattribute, thresholdvalue, gain
