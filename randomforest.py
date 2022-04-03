@@ -89,7 +89,34 @@ def kfoldcrossvalid(data, categorydict, k=10, ntree=10, maxdepth=5, minimalsize=
     return acc
 
 
-def importdata():
+def importhousedata():
+    house = importfile('hw3_house_votes_84.csv', ',')
+    housecategory = {}
+    for i in house[0]:
+        housecategory[i] = 'categorical'
+    housecategory["class"] = 'class'
+    housedata = np.array(house[1:]).astype(float)
+    return housedata, housecategory
+
+def importwinedata():
+    wine = importfile('hw3_wine.csv', '\t')
+    winecategory = {}
+    for i in wine[0]:
+        winecategory[i] = 'numerical'
+    winecategory["# class"] = 'class'
+    winedata = np.array(wine[1:]).astype(float)
+    return winedata, winecategory
+
+def importcancerdata():
+    cancer = importfile('hw3_cancer.csv', '\t')
+    cancercategory = {}
+    for i in cancer[0]:
+        cancercategory[i] = 'numerical'
+    cancercategory["Class"] = 'class'
+    cancerdata = np.array(cancer[1:]).astype(float)
+    return cancerdata, cancercategory
+
+def importcmcdata():
     cmc = importfile('cmc.data', ',')
     cmccategory = {"Wife's age":"numerical","Wife's education":"categorical",
     "Husband's education":"categorical","Number of children ever born":"numerical",
@@ -99,9 +126,12 @@ def importdata():
     cmcdata = np.array(cmc).astype(int)
     return cmcdata, cmccategory
     
-cmcdata,cmccategory = importdata()
+housedata, housecategory = importhousedata()
+winedata, winecategory = importwinedata()
+cancerdata, cancercategory = importcancerdata()
+cmcdata,cmccategory = importcmcdata()
 
-xval = kfoldcrossvalid(cmcdata, cmccategory, k=10, ntree=50, maxdepth=5, minimalsize=20, minimalgain=0.01, algortype='id3', bootstrapratio = 0.1)
+xval = kfoldcrossvalid(cancerdata, cancercategory, k=10, ntree=20, maxdepth=10, minimalsize=10, minimalgain=0.01, algortype='id3', bootstrapratio = 0.1)
 print(xval)
 # mytestforest = plantforest(cmcdata, cmccategory, ntree=150, maxdepth=7, minimalsize=10, minimalgain=0.001, algortype='id3', bootstrapratio=0.15)
 # tree01 = mytestforest[0]
