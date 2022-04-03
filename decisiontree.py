@@ -3,6 +3,7 @@ import numpy as np
 import csv
 import math
 import matplotlib.pyplot as plt
+import random
 from collections import Counter
 from utils import *
 
@@ -16,6 +17,7 @@ class Treenode:
     threshold = -1 # for numerical value
     testattributedict = {}
     depth = 0
+    _caldepth = 0
     
     parent = None
 
@@ -25,13 +27,12 @@ class Treenode:
         # self.left = left
         # self.right = right
 
-    def calculate_parent(self):
+    def caldepth(self):
         a = self
         while a.parent is not None:
-            self.depth += 1
-            print(self.depth)
+            self._caldepth += 1
             a = a.parent
-        return self.depth
+        return self._caldepth
 
 # Decision Tree
 def decisiontree(dataset: np.array, dictattributes: dict, algortype: str ='id3'):

@@ -1,6 +1,7 @@
 from sqlite3 import Row
 from sklearn import datasets
 import sklearn.model_selection
+import random
 import numpy as np
 import csv
 import math
