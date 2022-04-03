@@ -39,6 +39,7 @@ class Treenode:
             return True
         else:
             return False
+    
 
 # Decision Tree that only analyze square root of the data.
 def decisiontreeforest(dataset: np.array, dictattributes: dict, algortype: str ='id3', maxdepth: int = 10, minimalsize: int = 10, minimalgain: float = 0.01):

@@ -42,4 +42,22 @@ def bootstrap(data, ratio=0.1):
     # print(len(data2))
     return data2
 
+# Random Forest, plant a forest of n trees
+def plantforest(data, categorydict, ntree=10, maxdepth=10, minimalsize=10, minimalgain=0.01, algortype='id3'):
+    forest = []
+    for i in range(ntree):
+        datause = bootstrap(data, 0.05)
+        tree = decisiontreeforest(datause,categorydict,algortype,maxdepth,minimalsize,minimalgain)
+        forest.append(tree)
+    return forest
 
+# Predict the class of a single instance
+def forestvote(forest, instance, categorydict):
+    votes = {}
+    for tree in forest:
+        predict, correct, correctbool = prediction(tree,instance,categorydict)
+        if predict not in votes:
+            votes[predict] = 1
+        else:
+            votes[predict] += 1
+    return max(votes, key=votes.get), correct
