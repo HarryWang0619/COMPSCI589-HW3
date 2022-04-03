@@ -61,3 +61,36 @@ def forestvote(forest, instance, categorydict):
         else:
             votes[predict] += 1
     return max(votes, key=votes.get), correct
+
+def importdata():
+    cmc = importfile('cmc.data', ',')
+    cmccategory = {"Wife's age":"numerical","Wife's education":"categorical",
+    "Husband's education":"categorical","Number of children ever born":"numerical",
+    "Wife's religion":"binary","Wife's now working?":"binary",
+    "Husband's occupation":"categorical","Standard-of-living index":"categorical",
+    "Media exposure":"binary","Contraceptive method used":"class"}
+    cmcdata = np.array(cmc).astype(int)
+    return cmcdata, cmccategory
+    
+cmcdata,cmccategory = importdata()
+
+mytestforest = plantforest(cmcdata, cmccategory, ntree=70, maxdepth=5, minimalsize=10, minimalgain=0.001, algortype='gini')
+tree01 = mytestforest[0]
+
+cc = 0
+for instance in cmcdata:
+    predict,correct,bool = prediction(tree01,instance,cmccategory)
+    # print(predict,correct,bool)
+    if bool:
+        cc += 1
+
+print(cc/len(cmcdata))
+
+cc2 = 0
+for instance in cmcdata:
+    predict, correct = forestvote(mytestforest,instance,cmccategory)
+    #print(predict, correct)
+    if predict == correct:
+        cc2 += 1
+
+print(cc2/len(cmcdata))
