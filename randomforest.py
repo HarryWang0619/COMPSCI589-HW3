@@ -83,7 +83,7 @@ def kfoldcrossvalid(data, categorydict, k=10, ntree=10, maxdepth=5, minimalsize=
             if predict == correct:
                 correctcount += 1
         listofnd.append(np.array(emptyanalysis))
-        print('fold', i+1, ' accuracy: ', correctcount/len(testdataset))
+        # print('fold', i+1, ' accuracy: ', correctcount/len(testdataset))
         accuracylist.append(correctcount/len(testdataset))
     acc = np.mean(accuracylist)
     return listofnd, acc
