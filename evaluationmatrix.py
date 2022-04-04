@@ -58,10 +58,10 @@ def meanevaluation(listsofoutput, positivelabel, beta=1):
     accuarcylists, precisionlists, recalllists, fscorelists, notused = evaluate(listsofoutput, positivelabel, beta)
     return sum(accuarcylists)/len(accuarcylists), sum(precisionlists)/len(precisionlists), sum(recalllists)/len(recalllists), sum(fscorelists)/len(fscorelists)
 
-def markdownaprf(acc,pre,rec,fsc,beta,nvalue):
+def markdownaprf(acc,pre,rec,fsc,beta,nvalue,title):
     acc, pre, rec, fsc = round(acc,3), round(pre,3), round(rec,3), round(fsc,3)
     display(Markdown(rf"""
-	Result/Stat of {nvalue} trees random forest:
+	Result/Stat of {nvalue} trees random forest of {title}:
     | **Accuracy** | **Precision** | **Recall** | **F-Score, Beta={beta}** |
     | :---: | :---: | :---: | :---: |
     |{acc} | {pre} | {rec} | {fsc} |
