@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from IPython.display import display, Markdown
 
 def accuracy(truePosi, trueNega, falsePosi, falseNega): # Count of all four
 	return (truePosi+trueNega)/(truePosi+trueNega+falseNega+falsePosi)
@@ -57,12 +58,22 @@ def meanevaluation(listsofoutput, positivelabel, beta=1):
     accuarcylists, precisionlists, recalllists, fscorelists, notused = evaluate(listsofoutput, positivelabel, beta)
     return sum(accuarcylists)/len(accuarcylists), sum(precisionlists)/len(precisionlists), sum(recalllists)/len(recalllists), sum(fscorelists)/len(fscorelists)
 
-def markdowntemplate(tp,tn,fp,fn,beta,title):
-	acc = accuracy(tp,tn,fp,fn)
-	pre = precision(tp,tn,fp,fn)
-	rec = recall(tp,tn,fp,fn)
-	fsc = fscore(tp,tn,fp,fn,beta)
-	return
+def markdownaprf(acc,pre,rec,fsc,beta):
+    display(Markdown(rf"""
+    | **Accuracy** | **Precision** | **Recall** | **F-Score, Beta={beta}** |
+    | :---: | :---: | :---: | :---: |
+    |{acc} | {pre} | {rec} | {fsc} |
+    """))
+
+def markdownmatrix(tptnfpfn,title):
+    tp, tn, fp, fn = tptnfpfn[0], tptnfpfn[1], tptnfpfn[2], tptnfpfn[3]
+    display(Markdown(rf"""
+    Confusion Matrix: {title}
+    |  | **Predicted +** | **Predicted-** |
+    | :--- | :--- | :--- |
+    | **Actual +** | {tp} | {fp} |
+    | **Actual -** | {fn} | {tn} |
+    """))
 
 def confusionmatrix(truePosi, trueNega, falsePosi, falseNega, title=""):
 	fig = plt.figure()
